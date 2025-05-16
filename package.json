@@ -9,7 +9,8 @@
     "dev": "nodemon src/index.js",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
-    "vercel-build": "prisma generate"
+    "vercel-build": "prisma generate",
+    "build": "prisma generate"
   },
   "keywords": [
     "car",
