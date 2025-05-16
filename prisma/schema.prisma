@@ -1,0 +1,120 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  password        String
+  name            String
+  phoneNumber     String
+  address         String?
+  role            UserRole  @default(CUSTOMER)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relasi
+  carsListed      Car[]     @relation("CarOwner")
+  orders          Order[]   @relation("CustomerOrders")
+  salesOrders     Order[]   @relation("SellerOrders")
+  sentMessages    Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+}
+
+enum UserRole {
+  CUSTOMER
+  SELLER
+}
+
+model Car {
+  id            String   @id @default(cuid())
+  name          String
+  brand         String
+  model         String
+  year          Int
+  licensePlate  String   @unique
+  price         Float
+  imageUrl      String?
+  description   String?
+  isAvailable   Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relation to Owner (Seller)
+  ownerId       String
+  owner         User     @relation("CarOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  
+  // Relation to Orders
+  orders        Order[]
+}
+
+model Order {
+  id              String    @id @default(uuid())
+  startDate       DateTime
+  endDate         DateTime
+  totalPrice      Float
+  status          OrderStatus @default(PENDING)
+  paymentMethod   PaymentMethod
+  paymentStatus   PaymentStatus @default(UNPAID)
+  paymentToken    String?
+  paymentUrl      String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relasi
+  customerId      String
+  customer        User      @relation("CustomerOrders", fields: [customerId], references: [id])
+  sellerId        String
+  seller          User      @relation("SellerOrders", fields: [sellerId], references: [id])
+  carId           String
+  car             Car       @relation(fields: [carId], references: [id])
+  messages        Message[]
+
+  @@index([customerId])
+  @@index([sellerId])
+  @@index([carId])
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  VIRTUAL_ACCOUNT
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  REFUNDED
+}
+
+model Message {
+  id              String    @id @default(uuid())
+  content         String
+  createdAt       DateTime  @default(now())
+
+  // Relasi
+  senderId        String
+  sender          User      @relation("SentMessages", fields: [senderId], references: [id])
+  receiverId      String
+  receiver        User      @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  orderId         String?
+  order           Order?    @relation(fields: [orderId], references: [id])
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([orderId])
+}
