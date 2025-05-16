@@ -22,7 +22,7 @@ const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
     origin:
-      process.env.NODE_ENV === "production"
+      process.env.NODE_ENV === "development"
         ? "https://rentease-fe.vercel.app/"
         : "http://localhost:5173",
     methods: ["GET", "POST"],
