@@ -8,6 +8,7 @@ import orderRoutes from "./routes/order.js";
 import messageRoutes from "./routes/message.js";
 import paymentRoutes from "./routes/payment.js";
 import { authMiddleware } from "./middlewares/auth.js";
+import serverless from 'serverless-http';
 
 dotenv.config();
 
@@ -31,4 +32,4 @@ app.use("/api/messages", authMiddleware, messageRoutes);
 app.use("/api/payments", paymentRoutes);
 
 // Export app
-export default app;
+export default serverless(app);
