@@ -106,10 +106,9 @@ export const createCar = async (req, res) => {
     console.log("Headers:", req.headers);
     console.log("Body:", req.body);
     console.log("User:", req.user);
-
-    const { name, brand, model, year, licensePlate, price, description } =
-      req.body;
-
+    
+    const { name, brand, model, year, licensePlate, price, description, imageUrl } = req.body;
+    
     // Validate each field explicitly
     const errors = {};
     if (!name) errors.name = "Name is required";
@@ -118,14 +117,15 @@ export const createCar = async (req, res) => {
     if (!year) errors.year = "Year is required";
     if (!licensePlate) errors.licensePlate = "License Plate is required";
     if (!price) errors.price = "Price is required";
-
+    if (!imageUrl) errors.imageUrl = "Image URL is required";
+    
     if (Object.keys(errors).length > 0) {
       return res.status(400).json({
         message: "Validation failed",
         errors,
       });
     }
-
+    
     // Rest of the create car logic remains the same
     const car = await prisma.car.create({
       data: {
@@ -136,11 +136,12 @@ export const createCar = async (req, res) => {
         licensePlate,
         price: Number(price),
         description,
+        imageUrl,
         ownerId: req.user.id,
         isAvailable: true,
       },
     });
-
+    
     res.status(201).json({
       message: "Car created successfully",
       car,
